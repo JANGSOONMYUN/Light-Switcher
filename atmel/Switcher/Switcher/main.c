@@ -99,6 +99,7 @@ int main(void)
 	
     while (1) 
     {
+		//111
 		/*
 		control_motor(-20); _delay_ms(1000);
 		control_motor(  0); _delay_ms(1000);
