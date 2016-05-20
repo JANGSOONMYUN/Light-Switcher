@@ -8,6 +8,9 @@
 #include <util/delay.h>
 #include <avr/io.h>
 
+unsigned int baudrate = 25;	// 8MHz, double baudrate, 38400 bps
+unsigned char temp;
+
 void timer_init(){
 	DDRB=0x20;   // PB5 out
 	TCCR1A=0x82; // FAST PWM
@@ -24,27 +27,99 @@ void control_motor(int angle){
 	OCR1A=i; //PB5
 }
 
+void usart_init(){
+	DDRE = 0xFE; //시리얼통신을 위해 PE0핀은 RXD0로서 입력으로 설정하고, PE1 핀은 TXD0로서 출력으로 설정
+
+	UBRR0H = baudrate>>8; // 보레이트 설정 38400 bps
+
+	UBRR0L = baudrate;
+
+	UCSR0A = 0x02; // 비동기 모드, 더블 보레이트
+	// 0000 0010 U2Xn(Double the USARTn Transmission Speed)
+	//			클록의 분주비를 16에서 8로 낮추어 전송속도 2배 높이는 기능
+
+	UCSR0B = 0x18; // 0x98 rx interrupt enable, 8 data, tx 0xD8, tx_empty 0xF8
+
+	UCSR0C = 0x06; // no parity, 1 stop, 8 data
+
+	temp = UDR0; // dummy read
+}
+
+
+void tx_char(unsigned char tx_data)
+{
+	//시리얼포트로 데이터 송신이 완료되고 송신버퍼가 준비되었는지 검사
+
+	while((UCSR0A&0x20) == 0x00);
+
+	UDR0 = tx_data; //시리얼 포트를 통하여 데이터 전송
+
+}
+
+void tx_string(unsigned char *str_data)
+
+{
+
+	while(*str_data != 0x00){ //문자열의 끝부분이 아니라면
+
+		tx_char(*str_data); //시리얼포트로 한개의 문자를 송신한다.
+		str_data++;
+
+	}
+
+}
+
+char getch(void)
+{
+	while(!(UCSR0A& 0X80));
+	return UDR0;
+}
+
+void putch(char data)
+{
+	while(!(UCSR0A & 0x20));
+	UDR0 = data;
+}
+
+
 int main(void)
 {
 	unsigned char sw;
+	unsigned char *str="www.seniorcom.co.kr";
+
+	unsigned char cha=0;
+	
 	PORTD = 0xff;
     DDRD = 0xf0;	// 0: input, 1: output, switch KEY1~4 : PD0~PD3
 	 
 	int i;
 	DDRC=0xFF;
-	timer_init();
+	//timer_init();
+	usart_init();
 	
     while (1) 
     {
+		/*
 		control_motor(-20); _delay_ms(1000);
 		control_motor(  0); _delay_ms(1000);
 		control_motor( 20); _delay_ms(1000);
 		control_motor(  0); _delay_ms(1000);
+		*/
+		
+		cha=getch();
+		if(cha == 'a')
+		break;
+		tx_string(str); //문자열을 송신하는 프로그램
+	}
+	
+	while(1)
+	{
+		cha=getch();
+		putch(cha);
 	}
 	
 	
-	
-	// version 0.1
+	// version 0.2
 	
 	return 0;
 }
