@@ -81,7 +81,6 @@ void putch(char data)
 	UDR0 = data;
 }
 
-
 int main(void)
 {
 	unsigned char sw;
@@ -89,8 +88,12 @@ int main(void)
 
 	unsigned char cha=0;
 	
-	PORTD = 0xff;
+	PORTD = 0x00;
     DDRD = 0xf0;	// 0: input, 1: output, switch KEY1~4 : PD0~PD3
+	// PORTD0~2 : buttons(INPUT), PORTD4,5 : LED(OUTPUT) 
+	// 0b00110000, 0x30;
+	
+	
 	 
 	int i;
 	DDRC=0xFF;
@@ -99,6 +102,16 @@ int main(void)
 	
     while (1) 
     {
+		
+		
+		if((PIND & 0x01)==0)	// 1111 -> 1110 & 0001 == 0
+			control_motor(-20); _delay_ms(1000);
+		if((PIND & 0x02)==0)
+			control_motor(  0); _delay_ms(1000);
+		if((PIND & 0x04)==0)
+			control_motor( 20); _delay_ms(1000);
+		
+		
 		//111
 		/*
 		control_motor(-20); _delay_ms(1000);
