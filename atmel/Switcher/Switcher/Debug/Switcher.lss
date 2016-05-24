@@ -3,31 +3,31 @@ Switcher.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000016  00800100  00000148  000001dc  2**0
+  0 .data         00000002  00800100  000001f4  00000288  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         00000148  00000000  00000000  00000094  2**1
+  1 .text         000001f4  00000000  00000000  00000094  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .bss          00000001  00800116  00800116  000001f2  2**0
+  2 .bss          00000001  00800102  00800102  0000028a  2**0
                   ALLOC
-  3 .comment      00000030  00000000  00000000  000001f2  2**0
+  3 .comment      00000030  00000000  00000000  0000028a  2**0
                   CONTENTS, READONLY
-  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000224  2**2
+  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  000002bc  2**2
                   CONTENTS, READONLY
-  5 .debug_aranges 00000058  00000000  00000000  00000264  2**0
+  5 .debug_aranges 00000058  00000000  00000000  000002fc  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   0000023a  00000000  00000000  000002bc  2**0
+  6 .debug_info   0000040d  00000000  00000000  00000354  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 00000140  00000000  00000000  000004f6  2**0
+  7 .debug_abbrev 000001d5  00000000  00000000  00000761  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   000001fe  00000000  00000000  00000636  2**0
+  8 .debug_line   000002b8  00000000  00000000  00000936  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  000000a0  00000000  00000000  00000834  2**2
+  9 .debug_frame  000000a0  00000000  00000000  00000bf0  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    000001b4  00000000  00000000  000008d4  2**0
+ 10 .debug_str    000001ff  00000000  00000000  00000c90  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    00000108  00000000  00000000  00000a88  2**0
+ 11 .debug_loc    00000228  00000000  00000000  00000e8f  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000048  00000000  00000000  00000b90  2**0
+ 12 .debug_ranges 00000048  00000000  00000000  000010b7  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -116,20 +116,20 @@ Disassembly of section .text:
   98:	11 e0       	ldi	r17, 0x01	; 1
   9a:	a0 e0       	ldi	r26, 0x00	; 0
   9c:	b1 e0       	ldi	r27, 0x01	; 1
-  9e:	e8 e4       	ldi	r30, 0x48	; 72
+  9e:	e4 ef       	ldi	r30, 0xF4	; 244
   a0:	f1 e0       	ldi	r31, 0x01	; 1
   a2:	00 e0       	ldi	r16, 0x00	; 0
   a4:	0b bf       	out	0x3b, r16	; 59
   a6:	02 c0       	rjmp	.+4      	; 0xac <__do_copy_data+0x14>
   a8:	07 90       	elpm	r0, Z+
   aa:	0d 92       	st	X+, r0
-  ac:	a6 31       	cpi	r26, 0x16	; 22
+  ac:	a2 30       	cpi	r26, 0x02	; 2
   ae:	b1 07       	cpc	r27, r17
   b0:	d9 f7       	brne	.-10     	; 0xa8 <__do_copy_data+0x10>
 
 000000b2 <__do_clear_bss>:
   b2:	21 e0       	ldi	r18, 0x01	; 1
-  b4:	a6 e1       	ldi	r26, 0x16	; 22
+  b4:	a2 e0       	ldi	r26, 0x02	; 2
   b6:	b1 e0       	ldi	r27, 0x01	; 1
   b8:	01 c0       	rjmp	.+2      	; 0xbc <.do_clear_bss_start>
 
@@ -137,175 +137,224 @@ Disassembly of section .text:
   ba:	1d 92       	st	X+, r1
 
 000000bc <.do_clear_bss_start>:
-  bc:	a7 31       	cpi	r26, 0x17	; 23
+  bc:	a3 30       	cpi	r26, 0x03	; 3
   be:	b2 07       	cpc	r27, r18
   c0:	e1 f7       	brne	.-8      	; 0xba <.do_clear_bss_loop>
-  c2:	30 d0       	rcall	.+96     	; 0x124 <main>
-  c4:	3f c0       	rjmp	.+126    	; 0x144 <_exit>
+  c2:	42 d0       	rcall	.+132    	; 0x148 <main>
+  c4:	95 c0       	rjmp	.+298    	; 0x1f0 <_exit>
 
 000000c6 <__bad_interrupt>:
   c6:	9c cf       	rjmp	.-200    	; 0x0 <__vectors>
 
-000000c8 <usart_init>:
-	i=(angle)*9 + 1500;
-	OCR1A=i; //PB5
+000000c8 <timer_init>:
 }
-
-void usart_init(){
-	DDRE = 0xFE; //시리얼통신을 위해 PE0핀은 RXD0로서 입력으로 설정하고, PE1 핀은 TXD0로서 출력으로 설정
-  c8:	8e ef       	ldi	r24, 0xFE	; 254
-  ca:	82 b9       	out	0x02, r24	; 2
-
-	UBRR0H = baudrate>>8; // 보레이트 설정 38400 bps
-  cc:	80 91 01 01 	lds	r24, 0x0101
-  d0:	80 93 90 00 	sts	0x0090, r24
-
-	UBRR0L = baudrate;
-  d4:	80 91 00 01 	lds	r24, 0x0100
-  d8:	89 b9       	out	0x09, r24	; 9
-
-	UCSR0A = 0x02; // 비동기 모드, 더블 보레이트
-  da:	82 e0       	ldi	r24, 0x02	; 2
-  dc:	8b b9       	out	0x0b, r24	; 11
-	// 0000 0010 U2Xn(Double the USARTn Transmission Speed)
-	//			클록의 분주비를 16에서 8로 낮추어 전송속도 2배 높이는 기능
-
-	UCSR0B = 0x18; // 0x98 rx interrupt enable, 8 data, tx 0xD8, tx_empty 0xF8
-  de:	88 e1       	ldi	r24, 0x18	; 24
-  e0:	8a b9       	out	0x0a, r24	; 10
-
-	UCSR0C = 0x06; // no parity, 1 stop, 8 data
-  e2:	86 e0       	ldi	r24, 0x06	; 6
-  e4:	80 93 95 00 	sts	0x0095, r24
-
-	temp = UDR0; // dummy read
-  e8:	8c b1       	in	r24, 0x0c	; 12
-  ea:	80 93 16 01 	sts	0x0116, r24
-  ee:	08 95       	ret
-
-000000f0 <tx_char>:
-
-void tx_char(unsigned char tx_data)
-{
-	//시리얼포트로 데이터 송신이 완료되고 송신버퍼가 준비되었는지 검사
-
-	while((UCSR0A&0x20) == 0x00);
-  f0:	5d 9b       	sbis	0x0b, 5	; 11
-  f2:	fe cf       	rjmp	.-4      	; 0xf0 <tx_char>
-
-	UDR0 = tx_data; //시리얼 포트를 통하여 데이터 전송
-  f4:	8c b9       	out	0x0c, r24	; 12
-  f6:	08 95       	ret
-
-000000f8 <tx_string>:
-
-}
-
-void tx_string(unsigned char *str_data)
-
-{
-  f8:	cf 93       	push	r28
-  fa:	df 93       	push	r29
-  fc:	ec 01       	movw	r28, r24
-
-	while(*str_data != 0x00){ //문자열의 끝부분이 아니라면
-  fe:	88 81       	ld	r24, Y
- 100:	88 23       	and	r24, r24
- 102:	29 f0       	breq	.+10     	; 0x10e <tx_string+0x16>
- 104:	21 96       	adiw	r28, 0x01	; 1
-
-		tx_char(*str_data); //시리얼포트로 한개의 문자를 송신한다.
- 106:	f4 df       	rcall	.-24     	; 0xf0 <tx_char>
-
-void tx_string(unsigned char *str_data)
-
-{
-
-	while(*str_data != 0x00){ //문자열의 끝부분이 아니라면
- 108:	89 91       	ld	r24, Y+
- 10a:	81 11       	cpse	r24, r1
- 10c:	fc cf       	rjmp	.-8      	; 0x106 <tx_string+0xe>
-		tx_char(*str_data); //시리얼포트로 한개의 문자를 송신한다.
-		str_data++;
-
-	}
-
-}
- 10e:	df 91       	pop	r29
- 110:	cf 91       	pop	r28
- 112:	08 95       	ret
-
-00000114 <getch>:
-
-char getch(void)
-{
-	while(!(UCSR0A& 0X80));
- 114:	5f 9b       	sbis	0x0b, 7	; 11
- 116:	fe cf       	rjmp	.-4      	; 0x114 <getch>
-	return UDR0;
- 118:	8c b1       	in	r24, 0x0c	; 12
-}
- 11a:	08 95       	ret
-
-0000011c <putch>:
 
 void putch(char data)
 {
 	while(!(UCSR0A & 0x20));
- 11c:	5d 9b       	sbis	0x0b, 5	; 11
- 11e:	fe cf       	rjmp	.-4      	; 0x11c <putch>
 	UDR0 = data;
- 120:	8c b9       	out	0x0c, r24	; 12
- 122:	08 95       	ret
+  c8:	80 e2       	ldi	r24, 0x20	; 32
+  ca:	87 bb       	out	0x17, r24	; 23
+  cc:	82 e8       	ldi	r24, 0x82	; 130
+  ce:	8f bd       	out	0x2f, r24	; 47
+  d0:	8a e1       	ldi	r24, 0x1A	; 26
+  d2:	8e bd       	out	0x2e, r24	; 46
+  d4:	8c ed       	ldi	r24, 0xDC	; 220
+  d6:	95 e0       	ldi	r25, 0x05	; 5
+  d8:	9b bd       	out	0x2b, r25	; 43
+  da:	8a bd       	out	0x2a, r24	; 42
+  dc:	8f e1       	ldi	r24, 0x1F	; 31
+  de:	9e e4       	ldi	r25, 0x4E	; 78
+  e0:	97 bd       	out	0x27, r25	; 39
+  e2:	86 bd       	out	0x26, r24	; 38
+  e4:	08 95       	ret
 
-00000124 <main>:
+000000e6 <control_motor>:
+  e6:	86 3a       	cpi	r24, 0xA6	; 166
+  e8:	2f ef       	ldi	r18, 0xFF	; 255
+  ea:	92 07       	cpc	r25, r18
+  ec:	14 f4       	brge	.+4      	; 0xf2 <control_motor+0xc>
+  ee:	86 ea       	ldi	r24, 0xA6	; 166
+  f0:	9f ef       	ldi	r25, 0xFF	; 255
+  f2:	8b 35       	cpi	r24, 0x5B	; 91
+  f4:	91 05       	cpc	r25, r1
+  f6:	14 f0       	brlt	.+4      	; 0xfc <control_motor+0x16>
+  f8:	8a e5       	ldi	r24, 0x5A	; 90
+  fa:	90 e0       	ldi	r25, 0x00	; 0
+  fc:	9c 01       	movw	r18, r24
+  fe:	22 0f       	add	r18, r18
+ 100:	33 1f       	adc	r19, r19
+ 102:	22 0f       	add	r18, r18
+ 104:	33 1f       	adc	r19, r19
+ 106:	22 0f       	add	r18, r18
+ 108:	33 1f       	adc	r19, r19
+ 10a:	82 0f       	add	r24, r18
+ 10c:	93 1f       	adc	r25, r19
+ 10e:	84 52       	subi	r24, 0x24	; 36
+ 110:	9a 4f       	sbci	r25, 0xFA	; 250
+ 112:	9b bd       	out	0x2b, r25	; 43
+ 114:	8a bd       	out	0x2a, r24	; 42
+ 116:	08 95       	ret
+
+00000118 <usart_init>:
+ 118:	8e ef       	ldi	r24, 0xFE	; 254
+ 11a:	82 b9       	out	0x02, r24	; 2
+ 11c:	80 91 01 01 	lds	r24, 0x0101
+ 120:	80 93 90 00 	sts	0x0090, r24
+ 124:	80 91 00 01 	lds	r24, 0x0100
+ 128:	89 b9       	out	0x09, r24	; 9
+ 12a:	82 e0       	ldi	r24, 0x02	; 2
+ 12c:	8b b9       	out	0x0b, r24	; 11
+ 12e:	88 e1       	ldi	r24, 0x18	; 24
+ 130:	8a b9       	out	0x0a, r24	; 10
+ 132:	86 e0       	ldi	r24, 0x06	; 6
+ 134:	80 93 95 00 	sts	0x0095, r24
+ 138:	8c b1       	in	r24, 0x0c	; 12
+ 13a:	80 93 02 01 	sts	0x0102, r24
+ 13e:	08 95       	ret
+
+00000140 <getch>:
+ 140:	5f 9b       	sbis	0x0b, 7	; 11
+ 142:	fe cf       	rjmp	.-4      	; 0x140 <getch>
+ 144:	8c b1       	in	r24, 0x0c	; 12
+ 146:	08 95       	ret
+
+00000148 <main>:
 	unsigned char sw;
 	unsigned char *str="www.seniorcom.co.kr";
 
 	unsigned char cha=0;
 	
-	PORTD = 0xff;
- 124:	8f ef       	ldi	r24, 0xFF	; 255
- 126:	82 bb       	out	0x12, r24	; 18
+	PORTD = 0x00;
+ 148:	12 ba       	out	0x12, r1	; 18
     DDRD = 0xf0;	// 0: input, 1: output, switch KEY1~4 : PD0~PD3
- 128:	90 ef       	ldi	r25, 0xF0	; 240
- 12a:	91 bb       	out	0x11, r25	; 17
-	 
+ 14a:	80 ef       	ldi	r24, 0xF0	; 240
+ 14c:	81 bb       	out	0x11, r24	; 17
+	// 0b00110000, 0x30;
+	
+	
+	
 	int i;
 	DDRC=0xFF;
- 12c:	84 bb       	out	0x14, r24	; 20
-	//timer_init();
+ 14e:	8f ef       	ldi	r24, 0xFF	; 255
+ 150:	84 bb       	out	0x14, r24	; 20
+	timer_init();
+ 152:	ba df       	rcall	.-140    	; 0xc8 <timer_init>
 	usart_init();
- 12e:	cc df       	rcall	.-104    	; 0xc8 <usart_init>
-		control_motor(  0); _delay_ms(1000);
-		control_motor( 20); _delay_ms(1000);
-		control_motor(  0); _delay_ms(1000);
-		*/
+ 154:	e1 df       	rcall	.-62     	; 0x118 <usart_init>
+	
+    while (1) 
+    {
+		
+		
+		if((PIND & 0x01)==0){	// 1111 -> 1110 & 0001 == 0
+ 156:	80 99       	sbic	0x10, 0	; 16
+ 158:	0d c0       	rjmp	.+26     	; 0x174 <main+0x2c>
+			sei();
+ 15a:	78 94       	sei
+			control_motor(-20); _delay_ms(1000);
+ 15c:	8c ee       	ldi	r24, 0xEC	; 236
+ 15e:	9f ef       	ldi	r25, 0xFF	; 255
+ 160:	c2 df       	rcall	.-124    	; 0xe6 <control_motor>
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+ 162:	2f ef       	ldi	r18, 0xFF	; 255
+ 164:	89 e6       	ldi	r24, 0x69	; 105
+ 166:	98 e1       	ldi	r25, 0x18	; 24
+ 168:	21 50       	subi	r18, 0x01	; 1
+ 16a:	80 40       	sbci	r24, 0x00	; 0
+ 16c:	90 40       	sbci	r25, 0x00	; 0
+ 16e:	e1 f7       	brne	.-8      	; 0x168 <main+0x20>
+ 170:	00 c0       	rjmp	.+0      	; 0x172 <main+0x2a>
+ 172:	00 00       	nop
+		}
+		if((PIND & 0x02)==0){
+ 174:	81 99       	sbic	0x10, 1	; 16
+ 176:	0d c0       	rjmp	.+26     	; 0x192 <main+0x4a>
+			sei();
+ 178:	78 94       	sei
+			control_motor(  0); _delay_ms(1000);
+ 17a:	80 e0       	ldi	r24, 0x00	; 0
+ 17c:	90 e0       	ldi	r25, 0x00	; 0
+ 17e:	b3 df       	rcall	.-154    	; 0xe6 <control_motor>
+ 180:	2f ef       	ldi	r18, 0xFF	; 255
+ 182:	89 e6       	ldi	r24, 0x69	; 105
+ 184:	98 e1       	ldi	r25, 0x18	; 24
+ 186:	21 50       	subi	r18, 0x01	; 1
+ 188:	80 40       	sbci	r24, 0x00	; 0
+ 18a:	90 40       	sbci	r25, 0x00	; 0
+ 18c:	e1 f7       	brne	.-8      	; 0x186 <main+0x3e>
+ 18e:	00 c0       	rjmp	.+0      	; 0x190 <main+0x48>
+ 190:	00 00       	nop
+		}
+		if((PIND & 0x04)==0){
+ 192:	82 99       	sbic	0x10, 2	; 16
+ 194:	0d c0       	rjmp	.+26     	; 0x1b0 <main+0x68>
+			sei();
+ 196:	78 94       	sei
+			control_motor( 20); _delay_ms(1000);
+ 198:	84 e1       	ldi	r24, 0x14	; 20
+ 19a:	90 e0       	ldi	r25, 0x00	; 0
+ 19c:	a4 df       	rcall	.-184    	; 0xe6 <control_motor>
+ 19e:	2f ef       	ldi	r18, 0xFF	; 255
+ 1a0:	89 e6       	ldi	r24, 0x69	; 105
+ 1a2:	98 e1       	ldi	r25, 0x18	; 24
+ 1a4:	21 50       	subi	r18, 0x01	; 1
+ 1a6:	80 40       	sbci	r24, 0x00	; 0
+ 1a8:	90 40       	sbci	r25, 0x00	; 0
+ 1aa:	e1 f7       	brne	.-8      	; 0x1a4 <main+0x5c>
+ 1ac:	00 c0       	rjmp	.+0      	; 0x1ae <main+0x66>
+ 1ae:	00 00       	nop
+		}
+		//control_motor(  0); _delay_ms(1000);
+		//control_motor( 20); _delay_ms(1000);
+		//cli();
 		
 		cha=getch();
- 130:	f1 df       	rcall	.-30     	; 0x114 <getch>
-		if(cha == 'a')
- 132:	81 36       	cpi	r24, 0x61	; 97
- 134:	21 f0       	breq	.+8      	; 0x13e <main+0x1a>
-		break;
-		tx_string(str); //문자열을 송신하는 프로그램
- 136:	82 e0       	ldi	r24, 0x02	; 2
- 138:	91 e0       	ldi	r25, 0x01	; 1
- 13a:	de df       	rcall	.-68     	; 0xf8 <tx_string>
-	}
- 13c:	f9 cf       	rjmp	.-14     	; 0x130 <main+0xc>
-	
-	while(1)
-	{
-		cha=getch();
- 13e:	ea df       	rcall	.-44     	; 0x114 <getch>
-		putch(cha);
- 140:	ed df       	rcall	.-38     	; 0x11c <putch>
-	}
- 142:	fd cf       	rjmp	.-6      	; 0x13e <main+0x1a>
+ 1b0:	c7 df       	rcall	.-114    	; 0x140 <getch>
+		if(cha=='a'){
+ 1b2:	81 36       	cpi	r24, 0x61	; 97
+ 1b4:	69 f4       	brne	.+26     	; 0x1d0 <main+0x88>
+			control_motor(-20); _delay_ms(1000);
+ 1b6:	8c ee       	ldi	r24, 0xEC	; 236
+ 1b8:	9f ef       	ldi	r25, 0xFF	; 255
+ 1ba:	95 df       	rcall	.-214    	; 0xe6 <control_motor>
+ 1bc:	2f ef       	ldi	r18, 0xFF	; 255
+ 1be:	89 e6       	ldi	r24, 0x69	; 105
+ 1c0:	98 e1       	ldi	r25, 0x18	; 24
+ 1c2:	21 50       	subi	r18, 0x01	; 1
+ 1c4:	80 40       	sbci	r24, 0x00	; 0
+ 1c6:	90 40       	sbci	r25, 0x00	; 0
+ 1c8:	e1 f7       	brne	.-8      	; 0x1c2 <main+0x7a>
+ 1ca:	00 c0       	rjmp	.+0      	; 0x1cc <main+0x84>
+ 1cc:	00 00       	nop
+ 1ce:	c3 cf       	rjmp	.-122    	; 0x156 <main+0xe>
+		}
+		if(cha=='b'){
+ 1d0:	82 36       	cpi	r24, 0x62	; 98
+ 1d2:	09 f0       	breq	.+2      	; 0x1d6 <main+0x8e>
+ 1d4:	c0 cf       	rjmp	.-128    	; 0x156 <main+0xe>
+			control_motor(  0); _delay_ms(1000);
+ 1d6:	80 e0       	ldi	r24, 0x00	; 0
+ 1d8:	90 e0       	ldi	r25, 0x00	; 0
+ 1da:	85 df       	rcall	.-246    	; 0xe6 <control_motor>
+ 1dc:	2f ef       	ldi	r18, 0xFF	; 255
+ 1de:	89 e6       	ldi	r24, 0x69	; 105
+ 1e0:	98 e1       	ldi	r25, 0x18	; 24
+ 1e2:	21 50       	subi	r18, 0x01	; 1
+ 1e4:	80 40       	sbci	r24, 0x00	; 0
+ 1e6:	90 40       	sbci	r25, 0x00	; 0
+ 1e8:	e1 f7       	brne	.-8      	; 0x1e2 <main+0x9a>
+ 1ea:	00 c0       	rjmp	.+0      	; 0x1ec <main+0xa4>
+ 1ec:	00 00       	nop
+ 1ee:	b3 cf       	rjmp	.-154    	; 0x156 <main+0xe>
 
-00000144 <_exit>:
- 144:	f8 94       	cli
+000001f0 <_exit>:
+ 1f0:	f8 94       	cli
 
-00000146 <__stop_program>:
- 146:	ff cf       	rjmp	.-2      	; 0x146 <__stop_program>
+000001f2 <__stop_program>:
+ 1f2:	ff cf       	rjmp	.-2      	; 0x1f2 <__stop_program>

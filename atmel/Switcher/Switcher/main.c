@@ -7,6 +7,8 @@
 #define F_CPU 8000000 // 사용하는 CPU 클럭을 설정한다. delay.h를 위해 필요
 #include <util/delay.h>
 #include <avr/io.h>
+#include <avr/signal.h>
+#include <avr/interrupt.h>
 
 unsigned int baudrate = 25;	// 8MHz, double baudrate, 38400 bps
 unsigned char temp;
@@ -53,20 +55,15 @@ void tx_char(unsigned char tx_data)
 	while((UCSR0A&0x20) == 0x00);
 
 	UDR0 = tx_data; //시리얼 포트를 통하여 데이터 전송
-
 }
 
 void tx_string(unsigned char *str_data)
-
 {
-
 	while(*str_data != 0x00){ //문자열의 끝부분이 아니라면
 
 		tx_char(*str_data); //시리얼포트로 한개의 문자를 송신한다.
 		str_data++;
-
 	}
-
 }
 
 char getch(void)
@@ -83,9 +80,6 @@ void putch(char data)
 
 int main(void)
 {
-	unsigned char sw;
-	unsigned char *str="www.seniorcom.co.kr";
-
 	unsigned char cha=0;
 	
 	PORTD = 0x00;
@@ -93,47 +87,31 @@ int main(void)
 	// PORTD0~2 : buttons(INPUT), PORTD4,5 : LED(OUTPUT) 
 	// 0b00110000, 0x30;
 	
-	
-	 
-	int i;
-	DDRC=0xFF;
-	//timer_init();
+	timer_init();
 	usart_init();
+	
+	//cli();
+	//sei();
 	
     while (1) 
     {
-		
-		
-		if((PIND & 0x01)==0)	// 1111 -> 1110 & 0001 == 0
+		cha=getch();
+		if(cha=='a'){
 			control_motor(-20); _delay_ms(1000);
-		if((PIND & 0x02)==0)
+		}
+		if(cha=='b'){
 			control_motor(  0); _delay_ms(1000);
-		if((PIND & 0x04)==0)
-			control_motor( 20); _delay_ms(1000);
-		
-		
-		//111
-		/*
-		control_motor(-20); _delay_ms(1000);
-		control_motor(  0); _delay_ms(1000);
-		control_motor( 20); _delay_ms(1000);
-		control_motor(  0); _delay_ms(1000);
-		*/
-		
-		cha=getch();
-		if(cha == 'a')
-		break;
-		tx_string(str); //문자열을 송신하는 프로그램
-	}
-	
-	while(1)
-	{
-		cha=getch();
-		putch(cha);
+		}
+		if(cha=='c'){
+			control_motor(  20); _delay_ms(1000);
+		}
+		//if(cha == 'a')
+		//break;
+		//tx_string(str); //문자열을 송신하는 프로그램
 	}
 	
 	
-	// version 0.2
+	// version 1.0
 	
 	return 0;
 }
