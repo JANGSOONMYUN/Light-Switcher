@@ -102,17 +102,23 @@ int main(void)
 			control_motor(angle);
 		
 		
-		if(cha=='a'){
+		if(cha=='q'){
+			control_motor(-40); _delay_ms(1000);
+		}
+		if(cha=='w'){
+			control_motor(-30); _delay_ms(1000);
+		}
+		if(cha=='e'){
 			control_motor(-20); _delay_ms(1000);
 		}
-		if(cha=='b'){
-			control_motor(  0); _delay_ms(1000);
+		if(cha=='r'){
+			control_motor(-10); _delay_ms(1000);
 		}
-		if(cha=='c'){
-			control_motor(  20); _delay_ms(1000);
+		if(cha=='t'){
+			control_motor(0); _delay_ms(1000);
 		}
-		if(cha=='1c1'){
-			control_motor(  20); _delay_ms(1000);
+		if(cha=='y'){
+			control_motor(10); _delay_ms(1000);
 		}
 		//if(cha == 'a')
 		//break;
