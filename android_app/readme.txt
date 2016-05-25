@@ -1,1 +1,0 @@
-You can create and build a project file of the android here.
