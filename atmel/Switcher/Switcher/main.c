@@ -9,6 +9,7 @@
 #include <avr/io.h>
 #include <avr/signal.h>
 #include <avr/interrupt.h>
+#include <stdlib.h>
 
 unsigned int baudrate = 25;	// 8MHz, double baudrate, 38400 bps
 unsigned char temp;
@@ -80,8 +81,8 @@ void putch(char data)
 
 int main(void)
 {
-	unsigned char cha=0;
-	
+	unsigned char * cha = (char*)malloc(sizeof(char) * 5);
+	int angle = 0;
 	PORTD = 0x00;
     DDRD = 0xf0;	// 0: input, 1: output, switch KEY1~4 : PD0~PD3
 	// PORTD0~2 : buttons(INPUT), PORTD4,5 : LED(OUTPUT) 
@@ -96,6 +97,11 @@ int main(void)
     while (1) 
     {
 		cha=getch();
+		angle = atoi(cha);
+		if((angle >= -100) && (angle <= 100))
+			control_motor(angle);
+		
+		
 		if(cha=='a'){
 			control_motor(-20); _delay_ms(1000);
 		}
@@ -103,6 +109,9 @@ int main(void)
 			control_motor(  0); _delay_ms(1000);
 		}
 		if(cha=='c'){
+			control_motor(  20); _delay_ms(1000);
+		}
+		if(cha=='1c1'){
 			control_motor(  20); _delay_ms(1000);
 		}
 		//if(cha == 'a')

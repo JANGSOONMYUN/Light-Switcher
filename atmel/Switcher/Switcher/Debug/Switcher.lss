@@ -3,31 +3,31 @@ Switcher.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000002  00800100  000001f4  00000288  2**0
+  0 .data         00000002  00800100  00000218  000002ac  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         000001f4  00000000  00000000  00000094  2**1
+  1 .text         00000218  00000000  00000000  00000094  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .bss          00000001  00800102  00800102  0000028a  2**0
+  2 .bss          00000001  00800102  00800102  000002ae  2**0
                   ALLOC
-  3 .comment      00000030  00000000  00000000  0000028a  2**0
+  3 .comment      00000030  00000000  00000000  000002ae  2**0
                   CONTENTS, READONLY
-  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  000002bc  2**2
+  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  000002e0  2**2
                   CONTENTS, READONLY
-  5 .debug_aranges 00000058  00000000  00000000  000002fc  2**0
+  5 .debug_aranges 00000058  00000000  00000000  00000320  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   0000040d  00000000  00000000  00000354  2**0
+  6 .debug_info   00000385  00000000  00000000  00000378  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 000001d5  00000000  00000000  00000761  2**0
+  7 .debug_abbrev 000001f3  00000000  00000000  000006fd  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   000002b8  00000000  00000000  00000936  2**0
+  8 .debug_line   00000292  00000000  00000000  000008f0  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  000000a0  00000000  00000000  00000bf0  2**2
+  9 .debug_frame  000000a0  00000000  00000000  00000b84  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    000001ff  00000000  00000000  00000c90  2**0
+ 10 .debug_str    00000204  00000000  00000000  00000c24  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    00000228  00000000  00000000  00000e8f  2**0
+ 11 .debug_loc    00000192  00000000  00000000  00000e28  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000048  00000000  00000000  000010b7  2**0
+ 12 .debug_ranges 00000048  00000000  00000000  00000fba  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -116,8 +116,8 @@ Disassembly of section .text:
   98:	11 e0       	ldi	r17, 0x01	; 1
   9a:	a0 e0       	ldi	r26, 0x00	; 0
   9c:	b1 e0       	ldi	r27, 0x01	; 1
-  9e:	e4 ef       	ldi	r30, 0xF4	; 244
-  a0:	f1 e0       	ldi	r31, 0x01	; 1
+  9e:	e8 e1       	ldi	r30, 0x18	; 24
+  a0:	f2 e0       	ldi	r31, 0x02	; 2
   a2:	00 e0       	ldi	r16, 0x00	; 0
   a4:	0b bf       	out	0x3b, r16	; 59
   a6:	02 c0       	rjmp	.+4      	; 0xac <__do_copy_data+0x14>
@@ -141,7 +141,7 @@ Disassembly of section .text:
   be:	b2 07       	cpc	r27, r18
   c0:	e1 f7       	brne	.-8      	; 0xba <.do_clear_bss_loop>
   c2:	42 d0       	rcall	.+132    	; 0x148 <main>
-  c4:	95 c0       	rjmp	.+298    	; 0x1f0 <_exit>
+  c4:	a7 c0       	rjmp	.+334    	; 0x214 <_exit>
 
 000000c6 <__bad_interrupt>:
   c6:	9c cf       	rjmp	.-200    	; 0x0 <__vectors>
@@ -220,141 +220,152 @@ void putch(char data)
  146:	08 95       	ret
 
 00000148 <main>:
-	unsigned char sw;
-	unsigned char *str="www.seniorcom.co.kr";
 
-	unsigned char cha=0;
-	
+int main(void)
+{
+	unsigned char * cha = (char*)malloc(sizeof(char) * 5);
+	int angle = 0;
 	PORTD = 0x00;
  148:	12 ba       	out	0x12, r1	; 18
     DDRD = 0xf0;	// 0: input, 1: output, switch KEY1~4 : PD0~PD3
  14a:	80 ef       	ldi	r24, 0xF0	; 240
  14c:	81 bb       	out	0x11, r24	; 17
+	// PORTD0~2 : buttons(INPUT), PORTD4,5 : LED(OUTPUT) 
 	// 0b00110000, 0x30;
 	
-	
-	
-	int i;
-	DDRC=0xFF;
- 14e:	8f ef       	ldi	r24, 0xFF	; 255
- 150:	84 bb       	out	0x14, r24	; 20
 	timer_init();
- 152:	ba df       	rcall	.-140    	; 0xc8 <timer_init>
+ 14e:	bc df       	rcall	.-136    	; 0xc8 <timer_init>
 	usart_init();
- 154:	e1 df       	rcall	.-62     	; 0x118 <usart_init>
+ 150:	e3 df       	rcall	.-58     	; 0x118 <usart_init>
+	//cli();
+	//sei();
 	
     while (1) 
     {
+		cha=getch();
+ 152:	f6 df       	rcall	.-20     	; 0x140 <getch>
+ 154:	c8 2f       	mov	r28, r24
+ 156:	d0 e0       	ldi	r29, 0x00	; 0
+		angle = atoi(cha);
+ 158:	ce 01       	movw	r24, r28
+ 15a:	37 d0       	rcall	.+110    	; 0x1ca <atoi>
+		if((angle >= -100) && (angle <= 100))
+ 15c:	9c 01       	movw	r18, r24
+ 15e:	2c 59       	subi	r18, 0x9C	; 156
+ 160:	3f 4f       	sbci	r19, 0xFF	; 255
+ 162:	29 3c       	cpi	r18, 0xC9	; 201
+ 164:	31 05       	cpc	r19, r1
+ 166:	08 f4       	brcc	.+2      	; 0x16a <main+0x22>
+			control_motor(angle);
+ 168:	be df       	rcall	.-132    	; 0xe6 <control_motor>
 		
 		
-		if((PIND & 0x01)==0){	// 1111 -> 1110 & 0001 == 0
- 156:	80 99       	sbic	0x10, 0	; 16
- 158:	0d c0       	rjmp	.+26     	; 0x174 <main+0x2c>
-			sei();
- 15a:	78 94       	sei
+		if(cha=='a'){
+ 16a:	c1 36       	cpi	r28, 0x61	; 97
+ 16c:	d1 05       	cpc	r29, r1
+ 16e:	69 f4       	brne	.+26     	; 0x18a <main+0x42>
 			control_motor(-20); _delay_ms(1000);
- 15c:	8c ee       	ldi	r24, 0xEC	; 236
- 15e:	9f ef       	ldi	r25, 0xFF	; 255
- 160:	c2 df       	rcall	.-124    	; 0xe6 <control_motor>
+ 170:	8c ee       	ldi	r24, 0xEC	; 236
+ 172:	9f ef       	ldi	r25, 0xFF	; 255
+ 174:	b8 df       	rcall	.-144    	; 0xe6 <control_motor>
 	#else
 		//round up by default
 		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
 	#endif
 
 	__builtin_avr_delay_cycles(__ticks_dc);
- 162:	2f ef       	ldi	r18, 0xFF	; 255
- 164:	89 e6       	ldi	r24, 0x69	; 105
- 166:	98 e1       	ldi	r25, 0x18	; 24
- 168:	21 50       	subi	r18, 0x01	; 1
- 16a:	80 40       	sbci	r24, 0x00	; 0
- 16c:	90 40       	sbci	r25, 0x00	; 0
- 16e:	e1 f7       	brne	.-8      	; 0x168 <main+0x20>
- 170:	00 c0       	rjmp	.+0      	; 0x172 <main+0x2a>
- 172:	00 00       	nop
-		}
-		if((PIND & 0x02)==0){
- 174:	81 99       	sbic	0x10, 1	; 16
- 176:	0d c0       	rjmp	.+26     	; 0x192 <main+0x4a>
-			sei();
- 178:	78 94       	sei
-			control_motor(  0); _delay_ms(1000);
- 17a:	80 e0       	ldi	r24, 0x00	; 0
- 17c:	90 e0       	ldi	r25, 0x00	; 0
- 17e:	b3 df       	rcall	.-154    	; 0xe6 <control_motor>
- 180:	2f ef       	ldi	r18, 0xFF	; 255
- 182:	89 e6       	ldi	r24, 0x69	; 105
- 184:	98 e1       	ldi	r25, 0x18	; 24
- 186:	21 50       	subi	r18, 0x01	; 1
- 188:	80 40       	sbci	r24, 0x00	; 0
- 18a:	90 40       	sbci	r25, 0x00	; 0
- 18c:	e1 f7       	brne	.-8      	; 0x186 <main+0x3e>
- 18e:	00 c0       	rjmp	.+0      	; 0x190 <main+0x48>
- 190:	00 00       	nop
-		}
-		if((PIND & 0x04)==0){
- 192:	82 99       	sbic	0x10, 2	; 16
- 194:	0d c0       	rjmp	.+26     	; 0x1b0 <main+0x68>
-			sei();
- 196:	78 94       	sei
-			control_motor( 20); _delay_ms(1000);
- 198:	84 e1       	ldi	r24, 0x14	; 20
- 19a:	90 e0       	ldi	r25, 0x00	; 0
- 19c:	a4 df       	rcall	.-184    	; 0xe6 <control_motor>
- 19e:	2f ef       	ldi	r18, 0xFF	; 255
- 1a0:	89 e6       	ldi	r24, 0x69	; 105
- 1a2:	98 e1       	ldi	r25, 0x18	; 24
- 1a4:	21 50       	subi	r18, 0x01	; 1
- 1a6:	80 40       	sbci	r24, 0x00	; 0
- 1a8:	90 40       	sbci	r25, 0x00	; 0
- 1aa:	e1 f7       	brne	.-8      	; 0x1a4 <main+0x5c>
- 1ac:	00 c0       	rjmp	.+0      	; 0x1ae <main+0x66>
- 1ae:	00 00       	nop
-		}
-		//control_motor(  0); _delay_ms(1000);
-		//control_motor( 20); _delay_ms(1000);
-		//cli();
-		
-		cha=getch();
- 1b0:	c7 df       	rcall	.-114    	; 0x140 <getch>
-		if(cha=='a'){
- 1b2:	81 36       	cpi	r24, 0x61	; 97
- 1b4:	69 f4       	brne	.+26     	; 0x1d0 <main+0x88>
-			control_motor(-20); _delay_ms(1000);
- 1b6:	8c ee       	ldi	r24, 0xEC	; 236
- 1b8:	9f ef       	ldi	r25, 0xFF	; 255
- 1ba:	95 df       	rcall	.-214    	; 0xe6 <control_motor>
- 1bc:	2f ef       	ldi	r18, 0xFF	; 255
- 1be:	89 e6       	ldi	r24, 0x69	; 105
- 1c0:	98 e1       	ldi	r25, 0x18	; 24
- 1c2:	21 50       	subi	r18, 0x01	; 1
- 1c4:	80 40       	sbci	r24, 0x00	; 0
- 1c6:	90 40       	sbci	r25, 0x00	; 0
- 1c8:	e1 f7       	brne	.-8      	; 0x1c2 <main+0x7a>
- 1ca:	00 c0       	rjmp	.+0      	; 0x1cc <main+0x84>
- 1cc:	00 00       	nop
- 1ce:	c3 cf       	rjmp	.-122    	; 0x156 <main+0xe>
+ 176:	2f ef       	ldi	r18, 0xFF	; 255
+ 178:	89 e6       	ldi	r24, 0x69	; 105
+ 17a:	98 e1       	ldi	r25, 0x18	; 24
+ 17c:	21 50       	subi	r18, 0x01	; 1
+ 17e:	80 40       	sbci	r24, 0x00	; 0
+ 180:	90 40       	sbci	r25, 0x00	; 0
+ 182:	e1 f7       	brne	.-8      	; 0x17c <main+0x34>
+ 184:	00 c0       	rjmp	.+0      	; 0x186 <main+0x3e>
+ 186:	00 00       	nop
+ 188:	e4 cf       	rjmp	.-56     	; 0x152 <main+0xa>
 		}
 		if(cha=='b'){
- 1d0:	82 36       	cpi	r24, 0x62	; 98
- 1d2:	09 f0       	breq	.+2      	; 0x1d6 <main+0x8e>
- 1d4:	c0 cf       	rjmp	.-128    	; 0x156 <main+0xe>
+ 18a:	c2 36       	cpi	r28, 0x62	; 98
+ 18c:	d1 05       	cpc	r29, r1
+ 18e:	69 f4       	brne	.+26     	; 0x1aa <main+0x62>
 			control_motor(  0); _delay_ms(1000);
- 1d6:	80 e0       	ldi	r24, 0x00	; 0
- 1d8:	90 e0       	ldi	r25, 0x00	; 0
- 1da:	85 df       	rcall	.-246    	; 0xe6 <control_motor>
- 1dc:	2f ef       	ldi	r18, 0xFF	; 255
- 1de:	89 e6       	ldi	r24, 0x69	; 105
- 1e0:	98 e1       	ldi	r25, 0x18	; 24
- 1e2:	21 50       	subi	r18, 0x01	; 1
- 1e4:	80 40       	sbci	r24, 0x00	; 0
- 1e6:	90 40       	sbci	r25, 0x00	; 0
- 1e8:	e1 f7       	brne	.-8      	; 0x1e2 <main+0x9a>
- 1ea:	00 c0       	rjmp	.+0      	; 0x1ec <main+0xa4>
- 1ec:	00 00       	nop
- 1ee:	b3 cf       	rjmp	.-154    	; 0x156 <main+0xe>
+ 190:	80 e0       	ldi	r24, 0x00	; 0
+ 192:	90 e0       	ldi	r25, 0x00	; 0
+ 194:	a8 df       	rcall	.-176    	; 0xe6 <control_motor>
+ 196:	2f ef       	ldi	r18, 0xFF	; 255
+ 198:	89 e6       	ldi	r24, 0x69	; 105
+ 19a:	98 e1       	ldi	r25, 0x18	; 24
+ 19c:	21 50       	subi	r18, 0x01	; 1
+ 19e:	80 40       	sbci	r24, 0x00	; 0
+ 1a0:	90 40       	sbci	r25, 0x00	; 0
+ 1a2:	e1 f7       	brne	.-8      	; 0x19c <main+0x54>
+ 1a4:	00 c0       	rjmp	.+0      	; 0x1a6 <main+0x5e>
+ 1a6:	00 00       	nop
+ 1a8:	d4 cf       	rjmp	.-88     	; 0x152 <main+0xa>
+		}
+		if(cha=='c'){
+ 1aa:	c3 36       	cpi	r28, 0x63	; 99
+ 1ac:	d1 05       	cpc	r29, r1
+ 1ae:	89 f6       	brne	.-94     	; 0x152 <main+0xa>
+			control_motor(  20); _delay_ms(1000);
+ 1b0:	84 e1       	ldi	r24, 0x14	; 20
+ 1b2:	90 e0       	ldi	r25, 0x00	; 0
+ 1b4:	98 df       	rcall	.-208    	; 0xe6 <control_motor>
+ 1b6:	2f ef       	ldi	r18, 0xFF	; 255
+ 1b8:	89 e6       	ldi	r24, 0x69	; 105
+ 1ba:	98 e1       	ldi	r25, 0x18	; 24
+ 1bc:	21 50       	subi	r18, 0x01	; 1
+ 1be:	80 40       	sbci	r24, 0x00	; 0
+ 1c0:	90 40       	sbci	r25, 0x00	; 0
+ 1c2:	e1 f7       	brne	.-8      	; 0x1bc <main+0x74>
+ 1c4:	00 c0       	rjmp	.+0      	; 0x1c6 <main+0x7e>
+ 1c6:	00 00       	nop
+ 1c8:	c4 cf       	rjmp	.-120    	; 0x152 <main+0xa>
 
-000001f0 <_exit>:
- 1f0:	f8 94       	cli
+000001ca <atoi>:
+ 1ca:	fc 01       	movw	r30, r24
+ 1cc:	88 27       	eor	r24, r24
+ 1ce:	99 27       	eor	r25, r25
+ 1d0:	e8 94       	clt
+ 1d2:	21 91       	ld	r18, Z+
+ 1d4:	20 32       	cpi	r18, 0x20	; 32
+ 1d6:	e9 f3       	breq	.-6      	; 0x1d2 <atoi+0x8>
+ 1d8:	29 30       	cpi	r18, 0x09	; 9
+ 1da:	10 f0       	brcs	.+4      	; 0x1e0 <atoi+0x16>
+ 1dc:	2e 30       	cpi	r18, 0x0E	; 14
+ 1de:	c8 f3       	brcs	.-14     	; 0x1d2 <atoi+0x8>
+ 1e0:	2b 32       	cpi	r18, 0x2B	; 43
+ 1e2:	39 f0       	breq	.+14     	; 0x1f2 <atoi+0x28>
+ 1e4:	2d 32       	cpi	r18, 0x2D	; 45
+ 1e6:	31 f4       	brne	.+12     	; 0x1f4 <atoi+0x2a>
+ 1e8:	68 94       	set
+ 1ea:	03 c0       	rjmp	.+6      	; 0x1f2 <atoi+0x28>
+ 1ec:	0b d0       	rcall	.+22     	; 0x204 <__mulhi_const_10>
+ 1ee:	82 0f       	add	r24, r18
+ 1f0:	91 1d       	adc	r25, r1
+ 1f2:	21 91       	ld	r18, Z+
+ 1f4:	20 53       	subi	r18, 0x30	; 48
+ 1f6:	2a 30       	cpi	r18, 0x0A	; 10
+ 1f8:	c8 f3       	brcs	.-14     	; 0x1ec <atoi+0x22>
+ 1fa:	1e f4       	brtc	.+6      	; 0x202 <atoi+0x38>
+ 1fc:	90 95       	com	r25
+ 1fe:	81 95       	neg	r24
+ 200:	9f 4f       	sbci	r25, 0xFF	; 255
+ 202:	08 95       	ret
 
-000001f2 <__stop_program>:
- 1f2:	ff cf       	rjmp	.-2      	; 0x1f2 <__stop_program>
+00000204 <__mulhi_const_10>:
+ 204:	7a e0       	ldi	r23, 0x0A	; 10
+ 206:	97 9f       	mul	r25, r23
+ 208:	90 2d       	mov	r25, r0
+ 20a:	87 9f       	mul	r24, r23
+ 20c:	80 2d       	mov	r24, r0
+ 20e:	91 0d       	add	r25, r1
+ 210:	11 24       	eor	r1, r1
+ 212:	08 95       	ret
+
+00000214 <_exit>:
+ 214:	f8 94       	cli
+
+00000216 <__stop_program>:
+ 216:	ff cf       	rjmp	.-2      	; 0x216 <__stop_program>
