@@ -13,6 +13,7 @@
 
 unsigned int baudrate = 25;	// 8MHz, double baudrate, 38400 bps
 unsigned char temp;
+int sw = 1;	// 1: on 0: off
 
 void timer_init(){
 	DDRB=0x20;   // PB5 out
@@ -67,9 +68,25 @@ void tx_string(unsigned char *str_data)
 	}
 }
 
+char getswitch(){
+	if((PINC & 0x02) == 0x00){	// 0000 0101 & 0000 0010 = 0x00
+		if(sw == 1){
+			sw = 0;
+			return 'n';
+		}
+		else if(sw == 0){
+			sw = 1;
+			return 'f';
+		}
+	}
+	return '1';
+}
+
 char getch(void)
 {
-	while(!(UCSR0A& 0X80));
+	while(!(UCSR0A& 0X80)){
+		return getswitch();
+	}
 	return UDR0;
 }
 
@@ -83,8 +100,10 @@ int main(void)
 {
 	unsigned char * cha = (char*)malloc(sizeof(char) * 5);
 	int angle = 0;
-	PORTD = 0x00;
-    DDRD = 0xf0;	// 0: input, 1: output, switch KEY1~4 : PD0~PD3
+	
+	
+	//PORTC = 0x0f;
+    DDRC = 0xf0;	// 0: input, 1: output, switch KEY1~4 : PD0~PD3
 	// PORTD0~2 : buttons(INPUT), PORTD4,5 : LED(OUTPUT) 
 	// 0b00110000, 0x30;
 	
@@ -97,36 +116,50 @@ int main(void)
     while (1) 
     {
 		cha=getch();
+		/*
 		angle = atoi(cha);
 		if((angle >= -100) && (angle <= 100))
 			control_motor(angle);
-		
+		*/
 		
 		if(cha=='q'){
-			control_motor(-40); _delay_ms(1000);
+			control_motor(-40); _delay_ms(300);
 		}
 		if(cha=='w'){
-			control_motor(-30); _delay_ms(1000);
+			control_motor(-30); _delay_ms(300);
 		}
 		if(cha=='e'){
-			control_motor(-20); _delay_ms(1000);
+			control_motor(-20); _delay_ms(300);
 		}
 		if(cha=='r'){
-			control_motor(-10); _delay_ms(1000);
+			control_motor(-10); _delay_ms(300);
 		}
 		if(cha=='t'){
-			control_motor(0); _delay_ms(1000);
+			control_motor(0); _delay_ms(300);
 		}
 		if(cha=='y'){
-			control_motor(10); _delay_ms(1000);
+			control_motor(10); _delay_ms(300);
 		}
+		
+		if(cha=='n'){
+			PORTC = (PORTC & 0x0f) | 0x10;
+			control_motor(-30); _delay_ms(300);
+			
+		}
+		if(cha=='f'){
+			PORTC = (PORTC & 0x0f) | 0x20;
+			control_motor(10); _delay_ms(300);
+		}
+		
+		
+		
 		//if(cha == 'a')
 		//break;
 		//tx_string(str); //문자열을 송신하는 프로그램
 	}
 	
 	
-	// version 1.0
+	// version 1.1
 	
 	return 0;
 }
