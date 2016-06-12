@@ -16,10 +16,15 @@
 
 package com.example.android.BluetoothChat;
 
+import java.util.Calendar;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -49,6 +54,7 @@ public class BluetoothChat extends Activity {
     // Debugging
     private static final String TAG = "BluetoothChat";
     private static final boolean D = true;
+    private static final String INTENT_ACTION = "com.example.android.BluetoothChat";
 
     // Message types sent from the BluetoothChatService Handler
     public static final int MESSAGE_STATE_CHANGE = 1;
@@ -64,12 +70,15 @@ public class BluetoothChat extends Activity {
     // Intent request codes
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
+    private static final int REQUEST_ALARM_SET = 3;
 
     // Layout Views
     private TextView mTitle;
     private ListView mConversationView;
     private EditText mOutEditText;
     private Button mSendButton;
+    private Button mAlarmButton;
+    private View background;
 
     // Name of the connected device
     private String mConnectedDeviceName = null;
@@ -84,15 +93,22 @@ public class BluetoothChat extends Activity {
     
     private boolean status = false;	//변경
 
+    int hour = 0;
+    int min = 0;
+    int sec = 0;
+    DeviceListActivity autoConnect;
+    BluetoothDevice device;
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if(D) Log.e(TAG, "+++ ON CREATE +++");
-
+        
         // Set up the window layout
         requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         setContentView(R.layout.switch_control_on);
         
+        Log.e(TAG, "+++ ON CREATE +++");
         getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
 
         // Set up the custom title
@@ -111,12 +127,15 @@ public class BluetoothChat extends Activity {
             finish();
             return;
         }
+        
+       
     }
 
     @Override
     public void onStart() {
         super.onStart();
         if(D) Log.e(TAG, "++ ON START ++");
+        
 
         // If BT is not on, request that it be enabled.
         // setupChat() will then be called during onActivityResult
@@ -127,8 +146,23 @@ public class BluetoothChat extends Activity {
         } else {
             if (mChatService == null) setupChat();
         }
+        
+        autoConnection();
     }
 
+    private void autoConnection(){
+    	String address;
+		autoConnect = new DeviceListActivity();
+        address = autoConnect.AutoConnection();
+        
+		device = mBluetoothAdapter.getRemoteDevice(address);
+        // Attempt to connect to the device
+        
+        mChatService.connect(device);
+               
+        
+    }
+    
     @Override
     public synchronized void onResume() {
         super.onResume();
@@ -149,7 +183,7 @@ public class BluetoothChat extends Activity {
     private void setupChat() {
         Log.d(TAG, "setupChat()");
         
-        final View background =  findViewById(R.id.back);
+        background =  findViewById(R.id.back);
 
         // Initialize the array adapter for the conversation thread
         mConversationArrayAdapter = new ArrayAdapter<String>(this, R.layout.message);
@@ -183,6 +217,13 @@ public class BluetoothChat extends Activity {
             }
         });
 
+        mAlarmButton = (Button) findViewById(R.id.button_alarm);
+        mAlarmButton.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+            	AlarmView();
+            }
+        });
+        
         //Log.e(TAG, "+ BUG,BUG,BUG,BUG,BUG,BUG,BUG +");
         
         // Initialize the BluetoothChatService to perform bluetooth connections
@@ -212,7 +253,7 @@ public class BluetoothChat extends Activity {
         if(D) Log.e(TAG, "--- ON DESTROY ---");
     }
 
-    private void ensureDiscoverable() {
+    private void ensureDiscoverable() {		//필요없음
         if(D) Log.d(TAG, "ensure discoverable");
         if (mBluetoothAdapter.getScanMode() !=
             BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
@@ -271,6 +312,10 @@ public class BluetoothChat extends Activity {
                     mTitle.setText(R.string.title_connected_to);
                     mTitle.append(mConnectedDeviceName);
                     mConversationArrayAdapter.clear();
+                    BluetoothChat.this.background.setBackgroundColor(Color.WHITE);
+                    BluetoothChat.this.mSendButton.setText("off");
+                    BluetoothChat.this.status = true;
+                	BluetoothChat.this.sendMessage("f");
                     break;
                 case BluetoothChatService.STATE_CONNECTING:
                     mTitle.setText(R.string.title_connecting);
@@ -307,6 +352,8 @@ public class BluetoothChat extends Activity {
         }
     };
 
+    
+    
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(D) Log.d(TAG, "onActivityResult " + resultCode);
         switch (requestCode) {
@@ -333,6 +380,20 @@ public class BluetoothChat extends Activity {
                 Toast.makeText(this, R.string.bt_not_enabled_leaving, Toast.LENGTH_SHORT).show();
                 finish();
             }
+        case REQUEST_ALARM_SET:
+        	if(resultCode == RESULT_OK){
+        		hour = Integer.parseInt(data.getStringExtra("hour"));
+        	    min = Integer.parseInt(data.getStringExtra("min"));
+        	    sec = Integer.parseInt(data.getStringExtra("sec"));
+        	    
+        	    setAlarm(this, hour, min, sec);
+        	    
+    		    Toast.makeText(this, hour + "h " + min + "m " + sec + "s", Toast.LENGTH_SHORT).show(); 
+    		 } else {
+                 Log.d(TAG, "alarm not enabled");
+                 Toast.makeText(this, "alarm not enabled", Toast.LENGTH_SHORT).show();
+                 finish();
+             }
         }
     }
 
@@ -344,7 +405,7 @@ public class BluetoothChat extends Activity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item) {	// 하단 메뉴 부분!
         switch (item.getItemId()) {
         case R.id.scan:
             // Launch the DeviceListActivity to see devices and do scan
@@ -358,5 +419,36 @@ public class BluetoothChat extends Activity {
         }
         return false;
     }
+    
+    public void AlarmView(){		//The Intent of folder lists
+		Intent myIntent = new Intent(this, AlarmSetting.class);
+		startActivityForResult(myIntent, REQUEST_ALARM_SET);
+	}
+    
+    private void setAlarm(Context context, int h, int m, int s){  
+		Log.i(TAG, "setAlarm()"); 
+		long second = ((h*60*60) + (m*60) + s)*1000;
+		AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+
+		
+		Intent Intent = new Intent(this, BluetoothChat.class);
+		Intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		PendingIntent pIntent = PendingIntent.getActivity(context, 0, Intent, 0);
+		
+		alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + second, pIntent);
+	}
+    
+  
+    
+    private void releaseAlarm(Context context){  //아직 사용안함
+		Log.i(TAG, "releaseAlarm()"); 
+		AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+
+		Intent Intent = new Intent(INTENT_ACTION);
+		PendingIntent pIntent = PendingIntent.getActivity(context, 0, Intent, 0);
+		alarmManager.cancel(pIntent);
+	}
+    
+    
 
 }

@@ -15,7 +15,7 @@
         android:scaleType="fitXY"
         android:src="@drawable/b_icon_on" />
 
-    <ImageView
+    <Button
         android:id="@+id/button_alarm"
         android:layout_width="55dp"
         android:layout_height="55dp"

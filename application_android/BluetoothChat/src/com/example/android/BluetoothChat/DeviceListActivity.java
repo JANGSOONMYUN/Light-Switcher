@@ -16,8 +16,10 @@
 
 package com.example.android.BluetoothChat;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
-
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -43,6 +45,7 @@ import android.widget.AdapterView.OnItemClickListener;
  * by the user, the MAC address of the device is sent back to the parent
  * Activity in the result Intent.
  */
+@SuppressLint("NewApi")
 public class DeviceListActivity extends Activity {
     // Debugging
     private static final String TAG = "DeviceListActivity";
@@ -103,7 +106,7 @@ public class DeviceListActivity extends Activity {
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 
         // Get a set of currently paired devices
-        Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();
+        Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices(); 	//페어링 된 디바이스 목록
 
         // If there are paired devices, add each one to the ArrayAdapter
         if (pairedDevices.size() > 0) {
@@ -198,5 +201,36 @@ public class DeviceListActivity extends Activity {
             }
         }
     };
+    
+    public String AutoConnection(){
+    	String address = null;
+    	
+        // Set result CANCELED incase the user backs out
+        setResult(Activity.RESULT_CANCELED);
+        
+        
+        // Get the local Bluetooth adapter
+        
+        mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+        
+        // Get a set of currently paired devices
+        Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices(); 	//페어링 된 디바이스 목록
+        ArrayList<BluetoothDevice> deviceLists = new ArrayList<BluetoothDevice>(pairedDevices);
+        
+        //////////////////
+        mBtAdapter.cancelDiscovery();
+        if (pairedDevices.size() > 0){
+        	address = deviceLists.get(0).getAddress();
+        	Log.e(TAG, address);
+        }
+        
+        // Create the result Intent and include the MAC address
+        
+
+        // Set result and finish this Activity
+        
+        finish();
+        return address;
+    }
 
 }
