@@ -154,9 +154,12 @@ int main(void)
 		}
 		
 		
+<<<<<<< HEAD
 		//if(cha == 'a')
 		//break;
 		//tx_string(str); //문자열을 송신하는 프로그램
+=======
+>>>>>>> hardware2
 	}
 	
 	
